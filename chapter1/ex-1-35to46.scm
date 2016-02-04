@@ -76,3 +76,66 @@
   (+ (gen-cont-frac (lambda (i) 1.0) di k +) 2))
 (define (tanx x k)
   (* (/ 1 x) (gen-cont-frac (lambda (i) (square x)) (lambda (i) (- (* 2 i) 1)) k -)))
+
+(define (average-damp f)
+  (lambda (x) (/ (+ (f x) x) 2)))
+
+(define (sqrt-abs x)
+  (fixed-point (average-damp (lambda (y) (/ x y))) 1.0))
+
+(define (deriv f dx)
+  (lambda (x)
+    (/ (- (f (+ x dx)) (f (- x dx))) (* 2 dx))))
+
+(define (newton-transform g)
+  (lambda (x) (- x (/ (g x) ((deriv g 0.000001) x)))))
+
+(define (newton-method g)
+  (fixed-point (newton-transform g) 1.0))
+
+(define (newton-sqrt x)
+  (newton-method (lambda (y) (- (* y y) x))))
+
+(define (cubic a b c)
+  (lambda (x) (+ (* x x x) (* a x x) (* b x) c)))
+
+(define (double p)
+  (lambda (x) (p (p x)))
+  )
+(define (compose p2 p1)
+  (lambda (x) (p2 (p1 x))))
+
+(define (repeated f n)
+  (if  (= n 1)
+       f
+       (compose f (repeated f (- n 1)))
+       ))
+
+(define dx 0.00001)
+(define (smooth f)
+  (lambda (x) (/ (+ (f x) (f (- x dx)) (f (+ x dx))) 3))
+  )
+(define (inc x)
+  (+ 1 x))
+
+(define (3th-root x)
+  (fixed-point-abs ((repeated average-damp 1) (lambda (y) (/ x (* y y))))
+               1.5))
+
+(define (iterative-improve f-good-enough f-improve-guess)
+  (lambda (guess)
+    (if (f-good-enough guess (f-improve-guess guess))
+         guess
+         ((iterative-improve f-good-enough f-improve-guess) (f-improve-guess guess))
+     ))
+  )
+
+
+
+
+(define (close-enough? a b)
+  (< (abs (- a b)) 0.001))
+
+(define (fixed-point-abs f guess)
+  ((iterative-improve close-enough? f) guess))
+
