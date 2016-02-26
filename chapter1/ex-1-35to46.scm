@@ -35,10 +35,9 @@
           (iter next))))
   (iter first-guess))
 ()
-(define (my-sqrt x)                      
-  (fixed-point (lambda (y) (/ (+ y (/ x y)) 2)) 
+(define (my-sqrt x)
+  (fixed-point (lambda (y) (/ (+ y (/ x y)) 2))
                1))
-     
 
 ;; (fixed-point (lambda (x) (+ 1 (/ 1 x)))
 ;;               1))
@@ -138,4 +137,3 @@
 
 (define (fixed-point-abs f guess)
   ((iterative-improve close-enough? f) guess))
-
